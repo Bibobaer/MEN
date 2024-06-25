@@ -18,6 +18,10 @@ int main() {
 	errno_t err = fopen_s(&file, filePath, "r");
 	if (err != 0) {
 		if (err == 2) {
+			if (strcmp(filePath, "Crypt_Files\\out.txt") == 0) {
+				printf("You cant use this file name\n");
+				return -1;
+			}
 			if (fopen_s(&file, filePath, "w") != 0) {
 				printf("File dont open\n");
 				return -1;
@@ -27,7 +31,7 @@ int main() {
 			scanf_s("%s", key, 16);
 
 			int sizebuf = 0;
-			char *buf = (char*)malloc((sizebuf + 1)*sizeof(char));
+			char *buf = (char*)malloc((size_t)(sizebuf + 1)*sizeof(char));
 			if (!buf) {
 				return -1;
 			}
@@ -50,46 +54,46 @@ int main() {
 		return -1;
 	}
 	else {
-		fseek(file, 0, SEEK_END);
-		int Size_File = ftell(file);
-		fseek(file, 0, SEEK_SET);
+		int sizebuf = 4096;
 
-		char* buf = (char*)malloc((size_t)(Size_File + 1) * sizeof(char));
+		char* buf = (char*)malloc((size_t)(sizebuf+ 1) * sizeof(char));
 		if (!buf) {
 			return -1;
 		}
 
-		int i = 0;
-		char tmp = '0';
-		while (fscanf_s(file, "%c", &tmp, 1) != EOF)
-			buf[i++] = tmp;
-
-		buf[i] = '\0';
-		fclose(file);
-
 		printf("Enter the key: ");
 		scanf_s("%s", key, 16);
 
-		XOR_cipher(buf, key, buf);
-		printf("%s", buf);
+		char command[128];
 
-		if (EditBuf(&buf, &Size_File)) {
-			system("cls");
-
-			err = fopen_s(&file, filePath, "w");
-			if (err != 0)
-				return -1;
-
-			printf("%s\n", buf);
-
-			XOR_cipher(buf, key, buf);
-			fprintf(file, "%s", buf);
-			fclose(file);
-			return 0;
-		}
-		else {
+		FILE* out;
+		err = fopen_s(&out, "Crypt_Files\\out.txt", "w");
+		if (err != 0)
 			return -1;
+		int tmp_sizebuf = sizebuf;
+		size_t cntbytes = fread(buf, sizeof(char), sizebuf, file);
+		while (cntbytes != 0) {
+			buf[cntbytes] = '\0';
+			XOR_cipher(buf, key, buf);
+			printf("%s", buf);
+			if (EditBuf(&buf, &cntbytes)) {
+				system("cls");
+				printf("%s\n", buf);
+				XOR_cipher(buf, key, buf);
+				fprintf(out, "%s", buf);
+			}
+			else {
+				return -1;
+			}
+			cntbytes = fread(buf, sizeof(char), tmp_sizebuf, file);
 		}
+		fclose(file);
+		fclose(out);
+
+		sprintf_s(command, 128, "del %s", filePath);
+		system(command);
+		sprintf_s(command, 128, "rename Crypt_Files\\out.txt %s", filename);
+		system(command);
 	}
 	return 0;
 }

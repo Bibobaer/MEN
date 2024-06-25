@@ -1,4 +1,5 @@
 ﻿  main.c
+C:\Users\gilya\source\repos\Men_Encrypt_Notes\Men_Encrypt_Notes\main.c(79,22): warning C4133: функция: несовместимые типы - из "size_t *" в "int *"
   Men_Encrypt_Notes.vcxproj -> C:\Users\gilya\source\repos\Men_Encrypt_Notes\x64\Debug\Men_Encrypt_Notes.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.
